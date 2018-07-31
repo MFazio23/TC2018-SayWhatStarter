@@ -1,0 +1,35 @@
+{
+  "name": "saywhatstarter",
+  "version": "1.0.0",
+  "description": "A starter Action on Google for people attending \"Say What? Crafting Dialogue for Your Bot\"",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MFazio23/TC2018-SayWhatStarter.git"
+  },
+  "keywords": [
+    "google",
+    "home",
+    "google",
+    "assistant",
+    "actions",
+    "on",
+    "google",
+    "dialogflow"
+  ],
+  "author": "Michael Fazio <mfazio23@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MFazio23/TC2018-SayWhatStarter/issues"
+  },
+  "homepage": "https://github.com/MFazio23/TC2018-SayWhatStarter#readme",
+  "dependencies": {
+    "actions-on-google": "^2.2.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3"
+  }
+}
