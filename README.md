@@ -23,7 +23,7 @@ Text responses attached to the intent include:
 ### Contexts
 Contexts allow your agent to retain certain pieces of information from intent to intent and configure certain intents to only be triggered when in a given context.
 For example, a user can give their current location in one intent and the Dialogflow agent can remember that for a set number of intents after and use that value as needed.  Also, intents listed with the proper input context will only be trigged when that context is activated.
-The example here allows a user to cite their name then respond "yes" or "no" to hearing about how contexts work.  In both examples, the agent is able to reply with their name.
+The example here allows a user to cite their name then respond "yes" or "no" to hearing about how contexts work.  In both examples, the agent is able to reply with their name and the timestamp when they learned their name.
 One other piece of note here is the prompt associated with the `firstName` parameter.  Since we made this value required, we include an additional prompt to get that before moving onto the normal response.  If the user states their name initially, we can just skip the prompt piece.
 
 ### Google Assistant
