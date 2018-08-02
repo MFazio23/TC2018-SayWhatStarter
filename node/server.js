@@ -1,6 +1,7 @@
 const {dialogflow, BasicCard, Button} = require('actions-on-google');
 const express = require('express');
 const bodyParser = require('body-parser');
+const luxon = require('luxon');
 
 const endingQuestion = "What else can I do for you?";
 
@@ -20,7 +21,7 @@ const respond = (conv, response, end, noQuestion) => {
                 conv.ask(`${response}${noQuestion ? '' : `  ${endingQuestion}`}`);
             } else {
                 if (response.context) {
-                    conv.contexts.set(response.context.name, 1, {value: response.context.value});
+                    conv.contexts.set(response.context.name, 1, {[response.context.valueName]: response.context.value});
                 }
                 conv.ask(`${response.text}${noQuestion ? '' : `  ${endingQuestion}`}`);
                 if(response.gaResponse) conv.ask(response.gaResponse);
@@ -31,9 +32,9 @@ const respond = (conv, response, end, noQuestion) => {
 
 const app = dialogflow();
 // Intent handlers
-app.intent("Default Welcome Intent", conv => respond(conv, `Welcome to the Say What? Starter Action on Google! How can I help you?`, false, true));
-app.intent("Default Exit Intent", conv => respond(conv, `Farewell from the Say What? Starter Action on Google!`, true, false));
-app.intent("Default Fallback Intent", conv => respond(conv, `I have no idea what you just said.`));
+app.intent("Default Welcome Intent", conv => respond(conv, `Welcome to the Say What? Starter Action on Google (via the node.js webhook)! How can I help you?`, false, true));
+app.intent("Default Exit Intent", conv => respond(conv, `Farewell from the Say What? Starter Action on Google (via the node.js webhook)!`, true, false));
+app.intent("Default Fallback Intent", conv => respond(conv, `I have no idea what you just said (via the node.js webhook). Can you try again, please?`));
 app.intent("Basic Fulfillment", conv => {
     const response = getRandomItemFromArray([
         `This is a basic response via webhook.  We can send back whatever we want from our endpoint for Dialogflow to say.`,
@@ -43,19 +44,20 @@ app.intent("Basic Fulfillment", conv => {
 });
 app.intent("Contexts", conv => {
     const params = conv.parameters || {};
-    respond(conv, {text: `Hey there ${params.firstName}!  How about some extra info about contexts?`}, false, true);
-    /*respond(conv, {
+    respond(conv, {
         text: `Hey there ${params.firstName}!  How about some extra info about contexts?`,
-        context: {name: `firstName`, value: params.firstName}
-    }, false, true);*/
+        context: {name: `infoTime`, valueName: 'timestamp', value: luxon.DateTime.local().toLocaleString(luxon.DateTime.TIME_WITH_SECONDS)}
+    }, false, true);
 });
 app.intent("Contexts - yes", conv => {
     const params = conv.parameters || {};
-    respond(conv, `Wonderful, ${params.firstName}!   Contexts allow me to remember pieces of information from one statement to the next.  See how I remember your name is ${params.firstName} without you telling me again?`);
+    const infoTimeParams = conv.contexts.get('infotime') ? conv.contexts.get('infotime').parameters || {} : {};
+    respond(conv, `Wonderful, ${params.firstName}!   Contexts allow me to remember pieces of information from one statement to the next.  See how I remember your name is ${params.firstName} without you telling me again?  Also, I know you told me at ${infoTimeParams.timestamp}`);
 });
 app.intent("Contexts - no", conv => {
     const params = conv.parameters || {};
-    respond(conv, `Sorry to hear that, ${params.firstName}.  Maybe another time?`, false, true);
+    const infoTimeParams = conv.contexts.get('infotime') ? conv.contexts.get('infotime').parameters || {} : {};
+    respond(conv, `Sorry to hear that, ${params.firstName}.  Maybe another time (not the time you told me your name, ${infoTimeParams.timestamp})?`, false, true);
 });
 app.intent("Entities/Parameters", conv => {
     const params = conv.parameters || {};
