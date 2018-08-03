@@ -1,24 +1,23 @@
-const {dialogflow, BasicCard, Button} = require('actions-on-google');
-const express = require('express');
-const bodyParser = require('body-parser');
+const functions = require('firebase-functions');
+const { dialogflow, BasicCard, Button } = require('actions-on-google');
 const luxon = require('luxon');
 
-const endingQuestion = "What else can I do for you?";
+const endingQuestion = "How else may I assist you?";
 
 //Utility methods
 const getRandomItemFromArray = (array) => array[Math.floor(Math.random() * array.length)];
 
 const respond = (conv, response, end, noQuestion) => {
-    if (!response) {
-        response = `I'm sorry, I'm having trouble processing your request.`;
-        if (end) conv.close(response);
-        else conv.ask(`${response}  Please try again.`);
-    } else {
-        if (end) {
-            conv.close(response);
+        if (!response) {
+            response = `I'm sorry, I'm having trouble processing your request.`;
+            if (end) conv.close(response);
+            else conv.ask(`${response}  Please try again.`);
         } else {
-            if (typeof(response) === 'string') {
-                conv.ask(`${response}${noQuestion ? '' : `  ${endingQuestion}`}`);
+            if (end) {
+                conv.close(response);
+            } else {
+                if (typeof(response) === 'string') {
+                    conv.ask(`${response}${noQuestion ? '' : `  ${endingQuestion}`}`);
             } else {
                 if (response.context) {
                     conv.contexts.set(response.context.name, 1, {[response.context.valueName]: response.context.value});
@@ -32,9 +31,9 @@ const respond = (conv, response, end, noQuestion) => {
 
 const app = dialogflow();
 // Intent handlers
-app.intent("Default Welcome Intent", conv => respond(conv, `Welcome to the Say What? Starter Action on Google (via the node.js webhook)! How can I help you?`, false, true));
-app.intent("Default Exit Intent", conv => respond(conv, `Farewell from the Say What? Starter Action on Google (via the node.js webhook)!`, true, false));
-app.intent("Default Fallback Intent", conv => respond(conv, `I have no idea what you just said (via the node.js webhook). Can you try again, please?`, false, true));
+app.intent("Default Welcome Intent", conv => respond(conv, `Welcome to the Say What? Starter Action on Google (via the Firebase inline webhook)! How can I help you?`, false, true));
+app.intent("Default Exit Intent", conv => respond(conv, `Farewell from the Say What? Starter Action on Google (via the Firebase inline webhook)!`, true, false));
+app.intent("Default Fallback Intent", conv => respond(conv, `I have no idea what you just said (via the Firebase inline webhook). Can you try again, please?`, false, true));
 app.intent("Basic Fulfillment", conv => {
     const response = getRandomItemFromArray([
         `This is a basic response via webhook.  We can send back whatever we want from our endpoint for Dialogflow to say.`,
@@ -85,17 +84,17 @@ app.intent("Google Assistant", conv => {
         text: `Cards consist of an image, a card title, a card subtitle, and interactive buttons (for sending user queries or opening links).`,
         gaResponse: new BasicCard({
             title: `Google Assistant Response`,
-            subtitle: `via a node.js webhook`,
+            subtitle: `via a Cloud Function for Firebase`,
             image: {
-                url: `https://nodejs.org/static/images/logos/nodejs-new-pantone-black.png`,
-                accessibilityText: `node.js logo`
+                url: `https://i.ytimg.com/vi/vr0Gfvp5v1A/maxresdefault.jpg`,
+                accessibilityText: `Cloud Functions for Firebase logo`
             },
             buttons: new Button({
-                title: `node.js Home`,
-                url: `https://nodejs.org/en/`
+                title: `Cloud Functions for Firebase`,
+                url: `https://firebase.google.com/docs/functions/`
             })
         })
     });
 });
 
-express().use(bodyParser.json(), app).listen(2323);
+exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app);
