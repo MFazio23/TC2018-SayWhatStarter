@@ -24,8 +24,8 @@ object DialogflowHandler {
         else -> defaultFallback()
     }
 
-    private fun respond(text: String, end: Boolean = false, noQuestion: Boolean = false, messages: List<Message> = listOf(), context: List<Context> = listOf()): Response {
-        return Response(source, "$text${if (noQuestion) "" else "  $endingQuestion"}", messages, outputContexts = context)
+    private fun respond(text: String, end: Boolean = false, noQuestion: Boolean = false, messages: List<Message> = listOf(), contexts: List<Context> = listOf()): Response {
+        return Response(source, "$text${if (noQuestion) "" else "  $endingQuestion"}", messages, outputContexts = contexts)
     }
 
     private fun defaultWelcome(): Response = this.respond("Welcome to the Say What? Starter Action on Google (via the Kotlin webhook)! How can I help you?", noQuestion = true)
@@ -48,7 +48,7 @@ object DialogflowHandler {
         return this.respond(
             "Good to see you, $name!  How about some extra info about contexts?",
             noQuestion = true,
-            context = listOf(Context(
+            contexts = listOf(Context(
                 "${request.session}/contexts/infoTime",
                 1,
                 mapOf("timestamp" to LocalDateTime.now().format(dateFormatter))
@@ -69,7 +69,7 @@ object DialogflowHandler {
     }
 
     private fun entitiesParameters(request: Request): Response {
-        if (request.queryResult == null) return Response("blah")
+        if (request.queryResult == null) return Response("I'm missing info here.")
         val room: String = request.queryResult.parameters["room"] ?: ""
         val originalRoom: String = request.queryResult.parameters["originalRoom"]?.replace("([.?])*".toRegex(), "")
             ?: ""
@@ -89,7 +89,7 @@ object DialogflowHandler {
     private fun googleAssistant(request: Request): Response {
         val responseType: String? = request.queryResult?.parameters?.get("responseType")
         val messages: MutableList<Message> = mutableListOf(
-            GoogleSimpleResponses.create(GoogleSimpleResponse(
+            GoogleSimpleResponsesMessage.create(GoogleSimpleResponse(
                 "You can set different responses for speech and text.  This is going to say something different than what it displayed.",
                 "You can set different responses for text and speech.  This will look different than it sounds."))
         )
@@ -99,7 +99,7 @@ object DialogflowHandler {
         if (responseType == null || responseType == "basicCard") {
             messages.add(GoogleBasicCardMessage.create(
                 "Basic Card",
-                "Basic Card",
+                "from the Kotlin webhook",
                 "Cards consist of an image, a card title, a card subtitle, and interactive buttons (for sending user queries or opening links).",
                 BasicCardImage("https://upload.wikimedia.org/wikipedia/commons/b/b5/Kotlin-logo.png", "Kotlin Logo"),
                 BasicCardButton("Rich Messages (Card)", ButtonOpenUriAction("https://dialogflow.com/docs/rich-messages#card"))

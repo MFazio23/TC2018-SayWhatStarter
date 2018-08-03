@@ -15,7 +15,7 @@ class MessageDeserializer: JsonDeserializer<Message?> {
             val platform: String? = jsonObject["platform"]?.asString
             if(platform == "ACTIONS_ON_GOOGLE") {
                 val c = when {
-                    jsonObject.has("simpleResponses") -> GoogleSimpleResponses::class.java
+                    jsonObject.has("simpleResponses") -> GoogleSimpleResponsesMessage::class.java
                     jsonObject.has("basicCard") -> GoogleBasicCardMessage::class.java
                     jsonObject.has("linkOutSuggestion") -> GoogleLinkOutSuggestionMessage::class.java
                     else -> return null
